@@ -20,9 +20,6 @@ jobs:
           flutter-version: ${{env.FLUTTER_VERSION}}
           channel: 'stable'
 
-      - name: Flutter Pub Get
-        run: flutter pub get
-
       - name: Run Dart Analysis
         uses: invertase/github-action-dart-analyzer@main
         with:
