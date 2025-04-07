@@ -7,7 +7,6 @@ import 'package:moblabs/lab2/pages/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
