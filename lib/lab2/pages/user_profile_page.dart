@@ -42,6 +42,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
+
   Future<void> _logout() async {
     await Provider.of<AuthService>(context, listen: false).logout();
     if (mounted) {
@@ -75,6 +76,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
