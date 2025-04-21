@@ -16,7 +16,7 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
   final MobileScannerController _cameraController = MobileScannerController();
 
   Future<void> _onDetect(BarcodeCapture capture) async {
-    if (_scanned) return; // only handle one scan at a time
+    if (_scanned) return;
     setState(() => _scanned = true);
 
     final barcodes = capture.barcodes;
@@ -28,13 +28,12 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
 
     final raw = barcodes.first.rawValue;
     if (raw == null) {
-      _showSnack('Empty QR code');
+      _showSnack('Empty QR code, mate');
       setState(() => _scanned = false);
       return;
     }
 
     try {
-      // cast the dynamic result into the expected Map type
       final creds = jsonDecode(raw) as Map<String, dynamic>;
       final deviceId = creds['deviceId']?.toString();
       final deviceKey = creds['deviceKey']?.toString();

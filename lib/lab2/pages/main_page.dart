@@ -345,7 +345,8 @@ class _MainPageState extends State<MainPage> {
                   final item = _fitnessDataList[index];
                   return ListTile(
                     title: Text(
-                      'Date: ${item.date.toIso8601String()}, Steps: ${item.steps}, '
+                      'Date: ${item.date.toIso8601String()}, '
+                          'Steps: ${item.steps}, '
                       'Calories Burned: ${item.caloriesBurned}',
                     ),
                     trailing: Wrap(
