@@ -9,12 +9,14 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
+
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
     _navigateToNextPage();
   }
+
 
   void _showConnectivityDialog() {
     showDialog<void>(
@@ -44,6 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
       },
     );
   }
+
 
   Future<void> _navigateToNextPage() async {
     final isLoggedIn = SharedPrefsHolder.instance

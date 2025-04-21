@@ -31,6 +31,7 @@ class _MainPageState extends State<MainPage> {
   MqttServerClient? _mqttClient;
   double? _latestTemperature;
 
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +41,7 @@ class _MainPageState extends State<MainPage> {
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     _connectToMQTT();
   }
+
 
   void _showNoInternetDialog() {
     showDialog<void>(
@@ -62,12 +64,14 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+
   @override
   void dispose() {
     _connectivitySubscription.cancel();
     _mqttClient?.disconnect();
     super.dispose();
   }
+
 
   Future<void> initConnectivity() async {
     late List<ConnectivityResult> result;
@@ -85,6 +89,7 @@ class _MainPageState extends State<MainPage> {
     return _updateConnectionStatus(result);
   }
 
+
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
     setState(() {
       _connectionStatus = result;
@@ -94,6 +99,7 @@ class _MainPageState extends State<MainPage> {
       _showNoInternetDialog();
     }
   }
+
 
   void onItemTapped(
       BuildContext context,
@@ -215,6 +221,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+
   Future<void> _connectToMQTT() async {
     const broker = 'test.mosquitto.org';
     const port = 1883;
@@ -265,6 +272,7 @@ class _MainPageState extends State<MainPage> {
   void _onDisconnected() {
     developer.log('MQTT disconnected');
   }
+
 
   @override
   Widget build(BuildContext context) {
