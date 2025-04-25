@@ -60,7 +60,6 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
         throw const FormatException('Required keys missing');
       }
 
-      // Save credentials locally
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('deviceId', deviceId);
       await prefs.setString('deviceKey', deviceKey);
@@ -69,7 +68,6 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
         _statusMessage = 'Credentials saved. Connecting to ESP32...';
       });
 
-      // Send credentials to ESP32
       final response = await _sendToESP32(deviceId, deviceKey);
 
       setState(() {
@@ -95,14 +93,13 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
       // Find the ESP32 device (VID: 0x10C4, PID: 0xEA60 for CP210x)
       final devices = await UsbSerial.listDevices();
       final esp32Device = devices.firstWhereOrNull(
-            (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
+        (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
       );
 
       if (esp32Device == null) {
         throw Exception('ESP32 device not found. Please connect it via USB.');
       }
 
-      // Open serial connection
       final port = await esp32Device.create();
       if (port == null) {
         throw Exception('Failed to create serial port');
@@ -126,35 +123,29 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
         _statusMessage = 'Connected to ESP32. Sending credentials...';
       });
 
-      // Send credentials as JSON string with newline
-      final data = '${jsonEncode({'deviceId': deviceId,
-        'deviceKey': deviceKey,},)}\n';
+      final data =
+          '${jsonEncode({'deviceId': deviceId, 'deviceKey': deviceKey})}\n';
       await port.write(Uint8List.fromList(utf8.encode(data)));
 
       setState(() {
         _statusMessage = 'Credentials sent. Waiting for response...';
       });
 
-      // Read response from the device
       String response = '';
       final Stream<Uint8List> inputStream = port.inputStream!;
 
-      // Set up a completer to handle timeout
       final completer = Completer<String>();
 
-      // Set up timeout
       Future.delayed(const Duration(seconds: 5), () {
         if (!completer.isCompleted) {
           completer.complete('Timeout waiting for ESP32 response');
         }
       });
 
-      // Set up subscription to read data
       final subscription = inputStream.listen((Uint8List data) {
         final chunk = utf8.decode(data);
         response += chunk;
 
-        // Check if we got the success message
         if (response.contains('SUCCESS')) {
           if (!completer.isCompleted) {
             completer.complete(response);
@@ -162,10 +153,8 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
         }
       });
 
-      // Wait for response or timeout
       final result = await completer.future;
 
-      // Clean up
       subscription.cancel();
       await port.close();
 
@@ -176,8 +165,9 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:
-    Text(message),),);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
