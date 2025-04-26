@@ -90,7 +90,6 @@ class _SetupDevicePageState extends State<SetupDevicePage> {
 
   Future<String> _sendToESP32(String deviceId, String deviceKey) async {
     try {
-      // Find the ESP32 device (VID: 0x10C4, PID: 0xEA60 for CP210x)
       final devices = await UsbSerial.listDevices();
       final esp32Device = devices.firstWhereOrNull(
         (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
