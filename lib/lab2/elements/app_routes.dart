@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:moblabs/lab2/pages/login_page.dart';
 import 'package:moblabs/lab2/pages/main_page.dart';
 import 'package:moblabs/lab2/pages/registration_page.dart';

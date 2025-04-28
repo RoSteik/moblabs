@@ -40,6 +40,8 @@ dependencies:
   mqtt_client: ^10.8.0
 
   mobile_scanner: ^6.0.9
+  usb_serial: ^0.5.2
+  collection: ^1.16.0
 
 dev_dependencies:
   flutter_test:

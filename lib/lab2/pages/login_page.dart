@@ -1,7 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-
 import 'package:moblabs/lab2/logic/service/auth/auth_service.dart';
+
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -33,8 +33,10 @@ class _LoginPageState extends State<LoginPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('No Internet Connection'),
-          content: const Text('You are not connected to the internet. '
-              'Please check your connection and try again.'),
+          content: const Text(
+            'You are not connected to the internet. '
+            'Please check your connection and try again.',
+          ),
           actions: [
             TextButton(
               child: const Text('OK'),
@@ -72,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
