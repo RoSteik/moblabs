@@ -12,6 +12,7 @@ import 'package:moblabs/lab2/widgets/custom_drawer.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -31,17 +32,32 @@ class _MainPageState extends State<MainPage> {
   MqttServerClient? _mqttClient;
   double? _latestTemperature;
 
+  String? _deviceId;
+  String? _deviceKey;
+
+
 
   @override
   void initState() {
     super.initState();
     _loadFitnessDataList();
+
+    _loadDeviceCredentials();
+
     initConnectivity();
-    _connectivitySubscription =
-        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+      _updateConnectionStatus,
+    );
     _connectToMQTT();
   }
 
+  Future<void> _loadDeviceCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _deviceId = prefs.getString('deviceId');
+      _deviceKey = prefs.getString('deviceKey');
+    });
+  }
 
   void _showNoInternetDialog() {
     showDialog<void>(
@@ -49,8 +65,10 @@ class _MainPageState extends State<MainPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('No Internet Connection'),
-          content: const Text('You have lost connection to the internet.'
-              ' Some features may not be available.'),
+          content: const Text(
+            'You have lost connection to the internet.'
+            ' Some features may not be available.',
+          ),
           actions: [
             TextButton(
               child: const Text('OK'),
@@ -64,14 +82,12 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-
   @override
   void dispose() {
     _connectivitySubscription.cancel();
     _mqttClient?.disconnect();
     super.dispose();
   }
-
 
   Future<void> initConnectivity() async {
     late List<ConnectivityResult> result;
@@ -89,7 +105,6 @@ class _MainPageState extends State<MainPage> {
     return _updateConnectionStatus(result);
   }
 
-
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
     setState(() {
       _connectionStatus = result;
@@ -100,12 +115,11 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-
   void onItemTapped(
-      BuildContext context,
-      int index,
-      void Function(int) updateIndex,
-      ) {
+    BuildContext context,
+    int index,
+    void Function(int) updateIndex,
+  ) {
     if (index < pagesList(context).length) {
       updateIndex(index);
     } else if (index == 2) {
@@ -221,7 +235,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-
   Future<void> _connectToMQTT() async {
     const broker = 'test.mosquitto.org';
     const port = 1883;
@@ -273,14 +286,13 @@ class _MainPageState extends State<MainPage> {
     developer.log('MQTT disconnected');
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     final latestTemperature = _latestTemperature;
-    final temperatureDisplay = latestTemperature != null
-        ? '${latestTemperature.toStringAsFixed(1)} °C'
-        : 'No Data';
+    final temperatureDisplay =
+        latestTemperature != null
+            ? '${latestTemperature.toStringAsFixed(1)} °C'
+            : 'No Data';
 
     final temperatureWidget = Center(
       child: Column(
@@ -294,52 +306,77 @@ class _MainPageState extends State<MainPage> {
             temperatureDisplay,
             style: Theme.of(context).textTheme.headlineMedium,
           ),
+          const SizedBox(height: 20),
+          Text(
+            'Device ID: ${_deviceId ?? "No Data"}',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          Text(
+            'Device Key: ${_deviceKey ?? "No Data"}',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
         ],
       ),
     );
 
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fitness Tracker'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'setup') {
+                Navigator.pushNamed(context, '/setup_device');
+              }
+            },
+            itemBuilder:
+                (_) => const [
+                  PopupMenuItem(value: 'setup', child: Text('Setup Device')),
+                ],
+          ),
+        ],
       ),
       drawer: const CustomDrawer(),
-      body: _selectedIndex == 1
-          ? ListView.builder(
-        itemCount: _fitnessDataList.length,
-        itemBuilder: (context, index) {
-          final item = _fitnessDataList[index];
-          return ListTile(
-            title: Text(
-              'Date: ${item.date.toIso8601String()}, Steps: ${item.steps}, '
-                  'Calories Burned: ${item.caloriesBurned}',
-            ),
-            trailing: Wrap(
-              spacing: 12,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _deleteFitnessData(index),
-                ),
-              ],
-            ),
-          );
-        },
-      )
-          : _selectedIndex == 0
-          ? temperatureWidget
-          : Center(
-        child: _selectedIndex < pagesList(context).length
-            ? pagesList(context).elementAt(_selectedIndex)
-            : Container(),
-      ),
-      floatingActionButton: _selectedIndex == 1
-          ? FloatingActionButton(
-        onPressed: _addFitnessData,
-        tooltip: 'Add Data',
-        child: const Icon(Icons.add),
-      )
-          : null,
+      body:
+          _selectedIndex == 1
+              ? ListView.builder(
+                itemCount: _fitnessDataList.length,
+                itemBuilder: (context, index) {
+                  final item = _fitnessDataList[index];
+                  return ListTile(
+                    title: Text(
+                      'Date: ${item.date.toIso8601String()}, '
+                          'Steps: ${item.steps}, '
+                      'Calories Burned: ${item.caloriesBurned}',
+                    ),
+                    trailing: Wrap(
+                      spacing: 12,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _deleteFitnessData(index),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              )
+              : _selectedIndex == 0
+              ? temperatureWidget
+              : Center(
+                child:
+                    _selectedIndex < pagesList(context).length
+                        ? pagesList(context).elementAt(_selectedIndex)
+                        : Container(),
+              ),
+      floatingActionButton:
+          _selectedIndex == 1
+              ? FloatingActionButton(
+                onPressed: _addFitnessData,
+                tooltip: 'Add Data',
+                child: const Icon(Icons.add),
+              )
+              : null,
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
