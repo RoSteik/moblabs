@@ -47,5 +47,4 @@ class AuthService implements IAuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('lastLoggedInUser');
   }
-
 }

@@ -3,7 +3,7 @@ import 'package:moblabs/lab2/elements/app_routes.dart';
 import 'package:moblabs/lab2/logic/service/auth/auth_service.dart';
 import 'package:moblabs/lab2/logic/service/auth/user_storage_service.dart';
 import 'package:moblabs/lab2/logic/service/tracker/fitness_data_service.dart';
-import 'package:moblabs/lab2/pages/splash_screen.dart';
+import 'package:moblabs/lab2/pages/login/view/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -32,10 +32,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AuthService>(
+        Provider(
           create: (_) => AuthService(),
         ),
-        Provider<FitnessDataService>(
+        Provider(
           create: (_) => FitnessDataService(),
         ),
       ],
