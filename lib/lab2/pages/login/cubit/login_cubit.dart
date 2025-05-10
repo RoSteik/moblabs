@@ -23,7 +23,6 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> login() async {
     emit(state.copyWith(status: LoginStatus.loading));
 
-    // Check internet connectivity
     final connectivityResult = await _connectivity.checkConnectivity();
     if (connectivityResult.contains(ConnectivityResult.none)) {
       emit(state.copyWith(status: LoginStatus.noInternet));
