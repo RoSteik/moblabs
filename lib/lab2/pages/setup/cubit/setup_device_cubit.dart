@@ -53,8 +53,11 @@ class SetupDeviceCubit extends Cubit<SetupDeviceState> {
       await prefs.setString('deviceId', deviceId);
       await prefs.setString('deviceKey', deviceKey);
 
-      emit(const ProcessingState(message:
-      'Credentials saved. Connecting to ESP32...',),);
+      emit(
+        const ProcessingState(
+          message: 'Credentials saved. Connecting to ESP32...',
+        ),
+      );
 
       final response = await _sendToESP32(deviceId, deviceKey);
 
@@ -63,7 +66,6 @@ class SetupDeviceCubit extends Cubit<SetupDeviceState> {
       await Future<void>.delayed(const Duration(seconds: 2));
 
       // Navigation will be handled in the UI layer
-
     } catch (e) {
       emit(ErrorState(message: 'Error: $e'));
       _scanned = false;
@@ -76,7 +78,7 @@ class SetupDeviceCubit extends Cubit<SetupDeviceState> {
     try {
       final devices = await UsbSerial.listDevices();
       final esp32Device = devices.firstWhereOrNull(
-            (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
+        (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
       );
 
       if (esp32Device == null) {
@@ -104,8 +106,8 @@ class SetupDeviceCubit extends Cubit<SetupDeviceState> {
 
       emit(const ConnectingState());
 
-      final data = '${jsonEncode({'deviceId': deviceId,
-        'deviceKey': deviceKey,})}\n';
+      final data =
+          '${jsonEncode({'deviceId': deviceId, 'deviceKey': deviceKey})}\n';
       await port.write(Uint8List.fromList(utf8.encode(data)));
 
       emit(const WaitingResponseState());

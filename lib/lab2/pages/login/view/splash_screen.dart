@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moblabs/lab2/pages/login/cubit/splash_screen_cubit.dart';
 import 'package:moblabs/lab2/pages/login/cubit/splash_screen_state.dart';
 
-
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
@@ -64,13 +63,11 @@ class SplashScreenView extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed('/login');
               break;
             case SplashScreenStatus.loading:
-            // Do nothing while loading
+              // Do nothing while loading
               break;
           }
         },
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: const Center(child: CircularProgressIndicator()),
       ),
     );
   }

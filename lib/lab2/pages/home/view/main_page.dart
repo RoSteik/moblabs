@@ -8,7 +8,6 @@ import 'package:moblabs/lab2/pages/home/cubit/main_state.dart';
 import 'package:moblabs/lab2/widgets/custom_bottom_nav_bar.dart';
 import 'package:moblabs/lab2/widgets/custom_drawer.dart';
 
-
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
@@ -17,9 +16,9 @@ class MainPage extends StatelessWidget {
     return BlocConsumer<MainCubit, MainState>(
       listener: (context, state) {
         if (state.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error!)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error!)));
         }
 
         if (state.connectionStatus.contains(ConnectivityResult.none)) {
@@ -39,21 +38,26 @@ class MainPage extends StatelessWidget {
                     });
                   }
                 },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'setup', child: Text('Setup Device')),
-                ],
+                itemBuilder:
+                    (_) => const [
+                      PopupMenuItem(
+                        value: 'setup',
+                        child: Text('Setup Device'),
+                      ),
+                    ],
               ),
             ],
           ),
           drawer: const CustomDrawer(),
           body: _buildBody(context, state),
-          floatingActionButton: state.selectedIndex == 1
-              ? FloatingActionButton(
-            onPressed: () => _showAddDataDialog(context),
-            tooltip: 'Add Data',
-            child: const Icon(Icons.add),
-          )
-              : null,
+          floatingActionButton:
+              state.selectedIndex == 1
+                  ? FloatingActionButton(
+                    onPressed: () => _showAddDataDialog(context),
+                    tooltip: 'Add Data',
+                    child: const Icon(Icons.add),
+                  )
+                  : null,
           bottomNavigationBar: CustomBottomNavigationBar(
             selectedIndex: state.selectedIndex,
             onItemTapped: (index) => _onItemTapped(context, index),
@@ -81,9 +85,10 @@ class MainPage extends StatelessWidget {
   }
 
   Widget _buildTemperatureWidget(BuildContext context, MainState state) {
-    final temperatureDisplay = state.latestTemperature != null
-        ? '${state.latestTemperature!.toStringAsFixed(1)} °C'
-        : 'No Data';
+    final temperatureDisplay =
+        state.latestTemperature != null
+            ? '${state.latestTemperature!.toStringAsFixed(1)} °C'
+            : 'No Data';
 
     return Center(
       child: Column(
@@ -127,8 +132,9 @@ class MainPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton.icon(
-                      onPressed: () => context.read<MainCubit>()
-                          .checkESP32Connection(),
+                      onPressed:
+                          () =>
+                              context.read<MainCubit>().checkESP32Connection(),
                       icon: const Icon(Icons.refresh),
                       label: const Text('Refresh'),
                     ),
@@ -176,16 +182,16 @@ class MainPage extends StatelessWidget {
         return ListTile(
           title: Text(
             'Date: ${item.date.toIso8601String()}, '
-                'Steps: ${item.steps}, '
-                'Calories Burned: ${item.caloriesBurned}',
+            'Steps: ${item.steps}, '
+            'Calories Burned: ${item.caloriesBurned}',
           ),
           trailing: Wrap(
             spacing: 12,
             children: [
               IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => context.read<MainCubit>()
-                    .deleteFitnessData(index),
+                onPressed:
+                    () => context.read<MainCubit>().deleteFitnessData(index),
               ),
             ],
           ),
@@ -214,7 +220,7 @@ class MainPage extends StatelessWidget {
           title: const Text('No Internet Connection'),
           content: const Text(
             'You have lost connection to the internet. '
-                'Some features may not be available.',
+            'Some features may not be available.',
           ),
           actions: [
             TextButton(
@@ -288,9 +294,7 @@ class MainPage extends StatelessWidget {
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter valid data'),
-                    ),
+                    const SnackBar(content: Text('Please enter valid data')),
                   );
                 }
               },

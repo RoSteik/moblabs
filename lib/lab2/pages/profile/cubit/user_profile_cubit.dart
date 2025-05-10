@@ -9,7 +9,7 @@ class UserProfileCubit extends Cubit<UserProfileState> {
   final AuthService authService;
 
   UserProfileCubit({required this.authService})
-      : super(const UserProfileInitial()) {
+    : super(const UserProfileInitial()) {
     loadUserData();
   }
 
@@ -17,16 +17,18 @@ class UserProfileCubit extends Cubit<UserProfileState> {
     emit(const UserProfileLoading());
 
     try {
-      final lastLoggedInUserEmail = SharedPrefsHolder.instance
-          .getString('lastLoggedInUser');
+      final lastLoggedInUserEmail = SharedPrefsHolder.instance.getString(
+        'lastLoggedInUser',
+      );
 
       if (lastLoggedInUserEmail != null) {
-        final userString = SharedPrefsHolder.instance
-            .getString(lastLoggedInUserEmail);
+        final userString = SharedPrefsHolder.instance.getString(
+          lastLoggedInUserEmail,
+        );
 
         if (userString != null) {
           final Map<String, dynamic> userMap =
-          jsonDecode(userString) as Map<String, dynamic>;
+              jsonDecode(userString) as Map<String, dynamic>;
 
           final user = User.fromJson(userMap);
           emit(UserProfileLoaded(user));

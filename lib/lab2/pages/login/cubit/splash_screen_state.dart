@@ -4,22 +4,16 @@ enum SplashScreenStatus {
   loading,
   authenticatedWithInternet,
   authenticatedNoInternet,
-  unauthenticated
+  unauthenticated,
 }
 
 class SplashScreenState extends Equatable {
   final SplashScreenStatus status;
 
-  const SplashScreenState({
-    this.status = SplashScreenStatus.loading,
-  });
+  const SplashScreenState({this.status = SplashScreenStatus.loading});
 
-  SplashScreenState copyWith({
-    SplashScreenStatus? status,
-  }) {
-    return SplashScreenState(
-      status: status ?? this.status,
-    );
+  SplashScreenState copyWith({SplashScreenStatus? status}) {
+    return SplashScreenState(status: status ?? this.status);
   }
 
   @override

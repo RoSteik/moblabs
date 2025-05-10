@@ -6,7 +6,7 @@ class RegistrationCubit extends Cubit<RegistrationState> {
   final AuthService authService;
 
   RegistrationCubit({required this.authService})
-      : super(const RegistrationInitial());
+    : super(const RegistrationInitial());
 
   Future<void> register(String name, String email, String password) async {
     emit(const RegistrationLoading());

@@ -32,8 +32,9 @@ class ProcessingState extends SetupDeviceState {
 class ConnectingState extends SetupDeviceState {
   final String message;
 
-  const ConnectingState({this.message =
-  'Connected to ESP32. Sending credentials...',});
+  const ConnectingState({
+    this.message = 'Connected to ESP32. Sending credentials...',
+  });
 
   @override
   List<Object?> get props => [message];
@@ -42,8 +43,9 @@ class ConnectingState extends SetupDeviceState {
 class WaitingResponseState extends SetupDeviceState {
   final String message;
 
-  const WaitingResponseState({this.message =
-  'Credentials sent. Waiting for response...',});
+  const WaitingResponseState({
+    this.message = 'Credentials sent. Waiting for response...',
+  });
 
   @override
   List<Object?> get props => [message];
