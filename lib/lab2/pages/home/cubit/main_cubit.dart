@@ -74,10 +74,7 @@ class MainCubit extends Cubit<MainState> {
     final deviceId = prefs.getString('deviceId');
     final deviceKey = prefs.getString('deviceKey');
 
-    emit(state.copyWith(
-      deviceId: deviceId,
-      deviceKey: deviceKey,
-    ),);
+    emit(state.copyWith(deviceId: deviceId, deviceKey: deviceKey));
   }
 
   Future<void> saveDeviceCredentials(String deviceId, String deviceKey) async {
@@ -85,17 +82,16 @@ class MainCubit extends Cubit<MainState> {
     await prefs.setString('deviceId', deviceId);
     await prefs.setString('deviceKey', deviceKey);
 
-    emit(state.copyWith(
-      deviceId: deviceId,
-      deviceKey: deviceKey,
-    ),);
+    emit(state.copyWith(deviceId: deviceId, deviceKey: deviceKey));
   }
 
   Future<void> checkESP32Connection() async {
-    emit(state.copyWith(
-      isLoadingDeviceInfo: true,
-      deviceStatus: 'Checking device connection...',
-    ),);
+    emit(
+      state.copyWith(
+        isLoadingDeviceInfo: true,
+        deviceStatus: 'Checking device connection...',
+      ),
+    );
 
     final port = await _openESP32Connection();
     if (port == null) return;
@@ -134,36 +130,43 @@ class MainCubit extends Cubit<MainState> {
           deviceKey.isNotEmpty) {
         await saveDeviceCredentials(deviceId, deviceKey);
 
-        emit(state.copyWith(
-          isLoadingDeviceInfo: false,
-          deviceStatus: 'Device connected and verified',
-        ),);
+        emit(
+          state.copyWith(
+            isLoadingDeviceInfo: false,
+            deviceStatus: 'Device connected and verified',
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          isLoadingDeviceInfo: false,
-          deviceStatus: 'No stored credentials on ESP32',
-        ),);
+        emit(
+          state.copyWith(
+            isLoadingDeviceInfo: false,
+            deviceStatus: 'No stored credentials on ESP32',
+          ),
+        );
       }
     } catch (e) {
       await port.close();
-      emit(state.copyWith(
-        isLoadingDeviceInfo: false,
-        deviceStatus: 'Error: $e',
-      ),);
+      emit(
+        state.copyWith(isLoadingDeviceInfo: false, deviceStatus: 'Error: $e'),
+      );
     }
   }
 
-  Future<void> uploadCredentialsToESP32(String deviceId,
-      String deviceKey,) async {
+  Future<void> uploadCredentialsToESP32(
+    String deviceId,
+    String deviceKey,
+  ) async {
     if (deviceId.isEmpty || deviceKey.isEmpty) {
       emit(state.copyWith(error: 'Please enter both Device ID and Key'));
       return;
     }
 
-    emit(state.copyWith(
-      isLoadingDeviceInfo: true,
-      deviceStatus: 'Uploading credentials to ESP32...',
-    ),);
+    emit(
+      state.copyWith(
+        isLoadingDeviceInfo: true,
+        deviceStatus: 'Uploading credentials to ESP32...',
+      ),
+    );
 
     final port = await _openESP32Connection();
     if (port == null) return;
@@ -196,62 +199,76 @@ class MainCubit extends Cubit<MainState> {
       await port.close();
 
       if (response.contains('SUCCESS') || response.contains('OK')) {
-        emit(state.copyWith(
-          isLoadingDeviceInfo: false,
-          deviceStatus: 'Credentials uploaded successfully',
-        ),);
+        emit(
+          state.copyWith(
+            isLoadingDeviceInfo: false,
+            deviceStatus: 'Credentials uploaded successfully',
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          isLoadingDeviceInfo: false,
-          deviceStatus: 'Uploaded but no confirmation from ESP32',
-        ),);
+        emit(
+          state.copyWith(
+            isLoadingDeviceInfo: false,
+            deviceStatus: 'Uploaded but no confirmation from ESP32',
+          ),
+        );
       }
     } catch (e) {
       await port.close();
-      emit(state.copyWith(
-        isLoadingDeviceInfo: false,
-        deviceStatus: 'Error during upload: $e',
-      ),);
+      emit(
+        state.copyWith(
+          isLoadingDeviceInfo: false,
+          deviceStatus: 'Error during upload: $e',
+        ),
+      );
     }
   }
 
   Future<UsbPort?> _openESP32Connection() async {
+    const int baudRate = 115200;
+
     try {
       final devices = await UsbSerial.listDevices();
       final esp32Device = devices.firstWhereOrNull(
-            (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
+        (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
       );
 
       if (esp32Device == null) {
-        emit(state.copyWith(
-          isLoadingDeviceInfo: false,
-          deviceStatus: 'ESP32 not connected',
-        ),);
+        emit(
+          state.copyWith(
+            isLoadingDeviceInfo: false,
+            deviceStatus: 'ESP32 not connected',
+          ),
+        );
         return null;
       }
 
       final port = await esp32Device.create();
       if (port == null) {
-        emit(state.copyWith(
-          isLoadingDeviceInfo: false,
-          deviceStatus: 'Failed to create serial port',
-        ),);
+        emit(
+          state.copyWith(
+            isLoadingDeviceInfo: false,
+            deviceStatus: 'Failed to create serial port',
+          ),
+        );
         return null;
       }
 
       final bool openResult = await port.open();
       if (!openResult) {
-        emit(state.copyWith(
-          isLoadingDeviceInfo: false,
-          deviceStatus: 'Failed to open serial port',
-        ),);
+        emit(
+          state.copyWith(
+            isLoadingDeviceInfo: false,
+            deviceStatus: 'Failed to open serial port',
+          ),
+        );
         return null;
       }
 
       await port.setDTR(true);
       await port.setRTS(true);
       await port.setPortParameters(
-        115200,
+        baudRate,
         UsbPort.DATABITS_8,
         UsbPort.STOPBITS_1,
         UsbPort.PARITY_NONE,
@@ -259,10 +276,12 @@ class MainCubit extends Cubit<MainState> {
 
       return port;
     } catch (e) {
-      emit(state.copyWith(
-        isLoadingDeviceInfo: false,
-        deviceStatus: 'Error connecting to ESP32: $e',
-      ),);
+      emit(
+        state.copyWith(
+          isLoadingDeviceInfo: false,
+          deviceStatus: 'Error connecting to ESP32: $e',
+        ),
+      );
       return null;
     }
   }
@@ -270,7 +289,7 @@ class MainCubit extends Cubit<MainState> {
   Future<void> _initConnectivity() async {
     try {
       final result = await _connectivity.checkConnectivity();
-      _updateConnectionStatus(result);
+      await _updateConnectionStatus(result);
     } on PlatformException catch (e) {
       developer.log('Couldn\'t check connectivity status', error: e);
     }

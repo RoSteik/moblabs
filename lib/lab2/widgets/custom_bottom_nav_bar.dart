@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:moblabs/lab2/elements/responsive_config.dart';
 
-
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final void Function(int) onItemTapped;

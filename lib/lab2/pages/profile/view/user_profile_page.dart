@@ -5,12 +5,13 @@ import 'package:moblabs/lab2/logic/service/auth/auth_service.dart';
 import 'package:moblabs/lab2/pages/profile/cubit/user_profile_cubit.dart';
 import 'package:moblabs/lab2/pages/profile/cubit/user_profile_state.dart';
 
-
 class UserProfilePage extends StatelessWidget {
   const UserProfilePage({super.key});
 
-  void _showLogoutConfirmationDialog(BuildContext context,
-      UserProfileCubit cubit,) {
+  void _showLogoutConfirmationDialog(
+    BuildContext context,
+    UserProfileCubit cubit,
+  ) {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -45,9 +46,9 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => UserProfileCubit(
-        authService: context.read<AuthService>(),
-      ),
+      create:
+          (context) =>
+              UserProfileCubit(authService: context.read<AuthService>()),
       child: BlocBuilder<UserProfileCubit, UserProfileState>(
         builder: (context, state) {
           final cubit = context.read<UserProfileCubit>();
@@ -57,8 +58,8 @@ class UserProfilePage extends StatelessWidget {
               title: const Text('User Profile'),
               actions: [
                 TextButton(
-                  onPressed: () => _showLogoutConfirmationDialog(context,
-                      cubit,),
+                  onPressed:
+                      () => _showLogoutConfirmationDialog(context, cubit),
                   child: const Text(
                     'Log Out',
                     style: TextStyle(color: Colors.blue),
@@ -100,9 +101,7 @@ class UserProfilePage extends StatelessWidget {
           SizedBox(height: ResponsiveConfig.spacing(context) / 2),
           Text(
             'Email: ${state.user.email}',
-            style: TextStyle(
-              fontSize: ResponsiveConfig.fontSizeEmail(context),
-            ),
+            style: TextStyle(fontSize: ResponsiveConfig.fontSizeEmail(context)),
           ),
           SizedBox(height: ResponsiveConfig.spacing(context)),
         ],

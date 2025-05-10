@@ -21,14 +21,11 @@ class FitnessDataService implements IFitnessDataService {
     final prefs = await SharedPreferences.getInstance();
     final fitnessDataString = prefs.getString(_fitnessDataKey);
     if (fitnessDataString != null) {
-      final List<dynamic> jsonDataList =
-          jsonDecode(fitnessDataString) as List<dynamic>;
-      return jsonDataList
-          .map(
-            (jsonData) =>
-                FitnessData.fromJson(jsonData as Map<String, dynamic>),
-          )
-          .toList();
+      final jsonDataList = jsonDecode(fitnessDataString) as List;
+      return jsonDataList.map((jsonData) {
+        final map = Map<String, dynamic>.from(jsonData as Map);
+        return FitnessData.fromJson(map);
+      }).toList();
     }
     return [];
   }

@@ -4,16 +4,13 @@ import 'package:moblabs/lab2/logic/service/auth/auth_service.dart';
 import 'package:moblabs/lab2/pages/login/cubit/login_cubit.dart';
 import 'package:moblabs/lab2/pages/login/cubit/login_state.dart';
 
-
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LoginCubit(
-        authService: context.read<AuthService>(),
-      ),
+      create: (context) => LoginCubit(authService: context.read<AuthService>()),
       child: const LoginView(),
     );
   }
@@ -45,7 +42,7 @@ class _LoginViewState extends State<LoginView> {
           title: const Text('No Internet Connection'),
           content: const Text(
             'You are not connected to the internet. '
-                'Please check your connection and try again.',
+            'Please check your connection and try again.',
           ),
           actions: [
             TextButton(
@@ -66,11 +63,11 @@ class _LoginViewState extends State<LoginView> {
       listener: (context, state) {
         if (state.status == LoginStatus.success) {
           Navigator.pushReplacementNamed(context, '/home');
-        } else if (state.status == LoginStatus.failure
-            && state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
-          );
+        } else if (state.status == LoginStatus.failure &&
+            state.errorMessage != null) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
         } else if (state.status == LoginStatus.noInternet) {
           _showNoInternetDialog();
         }
@@ -127,8 +124,9 @@ class _PasswordInput extends StatelessWidget {
       builder: (context, state) {
         return TextField(
           controller: controller,
-          onChanged: (password) => context.read<LoginCubit>()
-              .passwordChanged(password),
+          onChanged:
+              (password) =>
+                  context.read<LoginCubit>().passwordChanged(password),
           obscureText: true,
           decoration: const InputDecoration(labelText: 'Password'),
         );
@@ -146,9 +144,9 @@ class _LoginButton extends StatelessWidget {
         return state.status == LoginStatus.loading
             ? const CircularProgressIndicator()
             : ElevatedButton(
-          onPressed: () => context.read<LoginCubit>().login(),
-          child: const Text('Login'),
-        );
+              onPressed: () => context.read<LoginCubit>().login(),
+              child: const Text('Login'),
+            );
       },
     );
   }
