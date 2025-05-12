@@ -18,12 +18,12 @@ class UserProfileCubit extends Cubit<UserProfileState> {
 
     try {
       final lastLoggedInUserEmail = SharedPrefsHolder.instance.getString(
-        'lastLoggedInUser',
+        SharedPrefKeys.lastLoggedInUser,
       );
 
       if (lastLoggedInUserEmail != null) {
         final userString = SharedPrefsHolder.instance.getString(
-          lastLoggedInUserEmail,
+          SharedPrefKeys.userDataKey(lastLoggedInUserEmail),
         );
 
         if (userString != null) {

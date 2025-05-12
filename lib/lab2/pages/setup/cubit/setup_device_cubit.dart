@@ -77,8 +77,10 @@ class SetupDeviceCubit extends Cubit<SetupDeviceState> {
   Future<String> _sendToESP32(String deviceId, String deviceKey) async {
     try {
       final devices = await UsbSerial.listDevices();
+      const int esp32Vid = 0x10C4;
+      const int esp32Pid = 0xEA60;
       final esp32Device = devices.firstWhereOrNull(
-        (device) => device.vid == 0x10C4 && device.pid == 0xEA60,
+        (device) => device.vid == esp32Vid && device.pid == esp32Pid,
       );
 
       if (esp32Device == null) {
