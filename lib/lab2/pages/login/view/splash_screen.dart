@@ -63,7 +63,6 @@ class SplashScreenView extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed('/login');
               break;
             case SplashScreenStatus.loading:
-              // Do nothing while loading
               break;
           }
         },

@@ -1,12 +1,15 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moblabs/lab2/dialogs/add_fitness_data_dialog.dart';
+import 'package:moblabs/lab2/dialogs/edit_credentials_dialog.dart';
 import 'package:moblabs/lab2/elements/pages_list.dart';
-import 'package:moblabs/lab2/logic/model/fitness_data.dart';
 import 'package:moblabs/lab2/pages/home/cubit/main_cubit.dart';
 import 'package:moblabs/lab2/pages/home/cubit/main_state.dart';
 import 'package:moblabs/lab2/widgets/custom_bottom_nav_bar.dart';
 import 'package:moblabs/lab2/widgets/custom_drawer.dart';
+import 'package:moblabs/lab2/widgets/device_settings_view.dart';
+import 'package:moblabs/lab2/widgets/fitness_data_list.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -27,37 +30,11 @@ class MainPage extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Fitness Tracker'),
-            actions: [
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'setup') {
-                    Navigator.pushNamed(context, '/setup_device').then((_) {
-                      // Credentials will be refreshed when returning
-                    });
-                  }
-                },
-                itemBuilder:
-                    (_) => const [
-                      PopupMenuItem(
-                        value: 'setup',
-                        child: Text('Setup Device'),
-                      ),
-                    ],
-              ),
-            ],
-          ),
+          appBar: const MainAppBar(),
           drawer: const CustomDrawer(),
-          body: _buildBody(context, state),
+          body: MainBodyContent(state: state),
           floatingActionButton:
-              state.selectedIndex == 1
-                  ? FloatingActionButton(
-                    onPressed: () => _showAddDataDialog(context),
-                    tooltip: 'Add Data',
-                    child: const Icon(Icons.add),
-                  )
-                  : null,
+              state.selectedIndex == 1 ? const AddDataFloatingButton() : null,
           bottomNavigationBar: CustomBottomNavigationBar(
             selectedIndex: state.selectedIndex,
             onItemTapped: (index) => _onItemTapped(context, index),
@@ -66,140 +43,6 @@ class MainPage extends StatelessWidget {
       },
     );
   }
-
-  Widget _buildBody(BuildContext context, MainState state) {
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    switch (state.selectedIndex) {
-      case 0:
-        return _buildTemperatureWidget(context, state);
-      case 1:
-        return _buildFitnessDataList(context, state);
-      default:
-        return state.selectedIndex < pagesList(context).length
-            ? pagesList(context).elementAt(state.selectedIndex)
-            : Container();
-    }
-  }
-
-  Widget _buildTemperatureWidget(BuildContext context, MainState state) {
-    final temperatureDisplay =
-        state.latestTemperature != null
-            ? '${state.latestTemperature!.toStringAsFixed(1)} °C'
-            : 'No Data';
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Latest Temperature:',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Text(
-            temperatureDisplay,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Device Status: ${state.deviceStatus}',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Device ID: ${state.deviceId ?? "No Data"}',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          Text(
-            'Device Key: ${state.deviceKey ?? "No Data"}',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 20),
-          if (state.isLoadingDeviceInfo)
-            const CircularProgressIndicator()
-          else
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => _showEditCredentialsDialog(context),
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit Credentials'),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed:
-                          () =>
-                              context.read<MainCubit>().checkESP32Connection(),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Refresh'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                  ),
-                  onPressed: () {
-                    if (state.deviceId != null && state.deviceKey != null) {
-                      context.read<MainCubit>().uploadCredentialsToESP32(
-                        state.deviceId!,
-                        state.deviceKey!,
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No credentials to upload'),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.upload),
-                  label: const Text('Upload Credentials to ESP32'),
-                ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFitnessDataList(BuildContext context, MainState state) {
-    return ListView.builder(
-      itemCount: state.fitnessDataList.length,
-      itemBuilder: (context, index) {
-        final item = state.fitnessDataList[index];
-        return ListTile(
-          title: Text(
-            'Date: ${item.date.toIso8601String()}, '
-            'Steps: ${item.steps}, '
-            'Calories Burned: ${item.caloriesBurned}',
-          ),
-          trailing: Wrap(
-            spacing: 12,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed:
-                    () => context.read<MainCubit>().deleteFitnessData(index),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   void _onItemTapped(BuildContext context, int index) {
     final cubit = context.read<MainCubit>();
 
@@ -225,134 +68,112 @@ class MainPage extends StatelessWidget {
           actions: [
             TextButton(
               child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );
       },
     );
   }
+}
 
-  Future<void> _showAddDataDialog(BuildContext context) async {
-    final dateController = TextEditingController();
-    final stepsController = TextEditingController();
-    final caloriesController = TextEditingController();
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Fitness Data'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                TextField(
-                  controller: dateController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter date (YYYY-MM-DD)',
-                  ),
-                ),
-                TextField(
-                  controller: stepsController,
-                  decoration: const InputDecoration(hintText: 'Enter steps'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: caloriesController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter calories burned',
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
+class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const MainAppBar({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: const Text('Fitness Tracker'),
+      actions: [
+        PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'setup') {
+              Navigator.pushNamed(context, '/setup_device');
+            }
+          },
+          itemBuilder:
+              (_) => const [
+                PopupMenuItem(value: 'setup', child: Text('Setup Device')),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                final date = DateTime.tryParse(dateController.text);
-                final steps = int.tryParse(stepsController.text);
-                final calories = int.tryParse(caloriesController.text);
-
-                if (date != null && steps != null && calories != null) {
-                  final newData = FitnessData(
-                    date: date,
-                    steps: steps,
-                    caloriesBurned: calories,
-                  );
-                  context.read<MainCubit>().addFitnessData(newData);
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter valid data')),
-                  );
-                }
-              },
-            ),
-          ],
-        );
-      },
+        ),
+      ],
     );
   }
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
 
-  Future<void> _showEditCredentialsDialog(BuildContext context) async {
-    final deviceIdController = TextEditingController(
-      text: context.read<MainCubit>().state.deviceId ?? '',
-    );
-    final deviceKeyController = TextEditingController(
-      text: context.read<MainCubit>().state.deviceKey ?? '',
-    );
+class MainBodyContent extends StatelessWidget {
+  final MainState state;
+  const MainBodyContent({required this.state, super.key});
+  @override
+  Widget build(BuildContext context) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Device Credentials'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                TextField(
-                  controller: deviceIdController,
-                  decoration: const InputDecoration(labelText: 'Device ID'),
-                ),
-                TextField(
-                  controller: deviceKeyController,
-                  decoration: const InputDecoration(labelText: 'Device Key'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () {
-                context.read<MainCubit>().saveDeviceCredentials(
-                  deviceIdController.text,
-                  deviceKeyController.text,
-                );
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+    switch (state.selectedIndex) {
+      case 0:
+        return DeviceSettingsView(
+          state: state,
+          onEditCredentials: () => _showEditCredentialsDialog(context),
+          onRefresh: () => context.read<MainCubit>().checkESP32Connection(),
+          onUploadCredentials: () {
+            if (state.deviceId != null && state.deviceKey != null) {
+              context.read<MainCubit>().uploadCredentialsToESP32(
+                state.deviceId!,
+                state.deviceKey!,
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No credentials to upload')),
+              );
+            }
+          },
         );
-      },
+      case 1:
+        return FitnessDataList(
+          fitnessDataList: state.fitnessDataList,
+          onDelete:
+              (index) => context.read<MainCubit>().deleteFitnessData(index),
+        );
+      default:
+        return state.selectedIndex < pagesList(context).length
+            ? pagesList(context).elementAt(state.selectedIndex)
+            : Container();
+    }
+  }
+  void _showEditCredentialsDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder:
+          (context) => EditCredentialsDialog(
+            initialDeviceId: context.read<MainCubit>().state.deviceId ?? '',
+            initialDeviceKey: context.read<MainCubit>().state.deviceKey ?? '',
+            onSave:
+                (deviceId, deviceKey) => context
+                    .read<MainCubit>()
+                    .saveDeviceCredentials(deviceId, deviceKey),
+          ),
+    );
+  }
+}
+
+class AddDataFloatingButton extends StatelessWidget {
+  const AddDataFloatingButton({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed:
+          () => showDialog<void>(
+            context: context,
+            builder:
+                (context) => AddFitnessDataDialog(
+                  onAdd:
+                      (data) => context.read<MainCubit>().addFitnessData(data),
+                ),
+          ),
+      tooltip: 'Add Data',
+      child: const Icon(Icons.add),
     );
   }
 }

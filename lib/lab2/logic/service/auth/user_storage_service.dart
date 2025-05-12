@@ -11,6 +11,12 @@ class SharedPrefsHolder {
   }
 }
 
+class SharedPrefKeys {
+  static const String lastLoggedInUser = 'lastLoggedInUser';
+
+  static String userDataKey(String email) => email;
+}
+
 abstract class IUserStorageService {
   Future<void> saveUser(User user);
 
@@ -28,7 +34,7 @@ class UserStorageService implements IUserStorageService {
     final userString = SharedPrefsHolder.instance.getString(email);
     if (userString != null) {
       final Map<String, dynamic> userMap =
-      jsonDecode(userString) as Map<String, dynamic>;
+          jsonDecode(userString) as Map<String, dynamic>;
       return User.fromJson(userMap);
     }
     return null;
